@@ -4,11 +4,12 @@ on:
     branches:
     - master
 env:
-  AZURE_WEBAPP_SERVER_NAME: BlazingPizzaServer20211209204914
-  AZURE_WEBAPP_SERVER_PACKAGE_PATH: BlazingPizza.Server/publish
-  AZURE_WEBAPP_SERVER_PUBLISH_PROFILE: ${{ secrets.BlazingPizzaServer20211209204914_707f }}
+  AAZURE_WEBAPP_NAME: BlazingPizzaClient20211209213904
+  AZURE_WEBAPP_PACKAGE_PATH: BlazingPizza.Client/publish
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.BlazingPizzaClient20211209213904_7867 }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 5.0.x
+  WORKING_DIRECTORY: BlazingPizza.Client
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -18,38 +19,22 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-    - name: Restore Solution
-      working-directory: src
-      run: dotnet restore BlazingPizza.sln
-    - name: Build Solution
-      working-directory: src
-      run: dotnet build BlazingPizza.sln --configuration ${{ env.CONFIGURATION }} --no-restore
-    - name: Publish Server
-      working-directory: src/BlazingPizza.Server
-      run: dotnet publish --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}"
-    - name: Deploy Server to Azure WebApp
+    - name: Restore
+      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    - name: Build
+      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Test
+      run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
+    - name: Publish
+      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+    - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_WEBAPP_SERVER_NAME }}
-        package: src/BlazingPizza.Server/${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}
-        publish-profile: ${{ env.AZURE_WEBAPP_SERVER_PUBLISH_PROFILE }}
-    - name: Publish Server to Azure
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+    - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
       with:
         name: webapp
-        path: ${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}
-        
-    #- name: Publish Client
-    #  working-directory: src/BlazingPizza.Client
-    #  run: dotnet publish --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}"
-    #- name: Deploy Client to Azure WebApp
-    #  uses: azure/webapps-deploy@v2
-    #  with:
-    #    app-name: ${{ env.AZURE_WEBAPP_SERVER_NAME }}
-    #    package: ${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}
-    #    publish-profile: ${{ env.AZURE_WEBAPP_SERVER_PUBLISH_PROFILE }}
-    #- name: Publish Client to Azure
-    #  uses: actions/upload-artifact@v1.0.0
-    #  with:
-    #    name: webapp
-    #    path: ${{ env.AZURE_WEBAPP_SERVER_PACKAGE_PATH }}
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
