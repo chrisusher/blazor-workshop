@@ -1,15 +1,15 @@
-name: Build - Deploy to Azure - Run Playwright Tests
+name: Build and deploy .NET Core app to Linux WebApp BlazingPizzaClient20211209213904
 on:
   push:
     branches:
     - master
 env:
-  AAZURE_WEBAPP_NAME: BlazingPizzaClient20211209213904
+  AZURE_WEBAPP_NAME: BlazingPizzaClient20211209213904
   AZURE_WEBAPP_PACKAGE_PATH: BlazingPizza.Client/publish
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.BlazingPizzaClient20211209213904_7867 }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 5.0.x
-  WORKING_DIRECTORY: src/BlazingPizza.Client
+  WORKING_DIRECTORY: BlazingPizza.Client
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
